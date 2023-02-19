@@ -1,0 +1,900 @@
+definitions:
+  entity.Role:
+    enum:
+    - Users
+    - Admin
+    - Operator
+    type: string
+    x-enum-varnames:
+    - Users
+    - Admin
+    - Operator
+  entity.Status:
+    enum:
+    - Open
+    - Closed
+    type: string
+    x-enum-varnames:
+    - Open
+    - Closed
+  request.AuctionCreateRequest:
+    properties:
+      bidders_count:
+        type: integer
+      end_at:
+        type: string
+      last_price:
+        type: integer
+      product:
+        $ref: '#/definitions/request.Product'
+      status:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - product
+    - user_id
+    type: object
+  request.AuctionUpdateRequest:
+    properties:
+      end_at:
+        type: string
+      last_price:
+        type: integer
+      status:
+        $ref: '#/definitions/entity.Status'
+      user_id:
+        type: integer
+    type: object
+  request.HistoryRequest:
+    properties:
+      log:
+        type: string
+    type: object
+  request.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  request.Product:
+    properties:
+      description:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+    required:
+    - name
+    - price
+    type: object
+  request.ProductRequest:
+    properties:
+      description:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      price:
+        type: integer
+    type: object
+  request.UserCreateRequest:
+    properties:
+      address:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone:
+        type: string
+      role:
+        $ref: '#/definitions/entity.Role'
+    required:
+    - email
+    - name
+    - password
+    - role
+    type: object
+  request.UserEmailRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  request.UserRoleRequest:
+    properties:
+      role:
+        $ref: '#/definitions/entity.Role'
+    required:
+    - role
+    type: object
+  request.UserUpdateRequest:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+host: 127.0.0.1:8080
+info:
+  contact:
+    email: yahyatruth@gmail.com
+    name: API Support
+  description: This is a server for a auction application.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Auction API Documentation
+  version: "1.0"
+paths:
+  /auction-histories:
+    get:
+      consumes:
+      - application/json
+      description: Get All Auction History
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+      security:
+      - ApiKeyAuth: []
+      summary: Get All Auction History
+      tags:
+      - Auction History
+  /auction-histories/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Auction History
+      parameters:
+      - description: Auction History Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Auction History
+      tags:
+      - Auction History
+    get:
+      consumes:
+      - application/json
+      description: Get Auction History By Id
+      parameters:
+      - description: Auction History Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+      summary: Get Auction History By Id
+      tags:
+      - Auction History
+    put:
+      consumes:
+      - application/json
+      description: Update Auction History
+      parameters:
+      - description: Auction History Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Update Auction History
+      tags:
+      - Auction History
+  /auction-histories/auction/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Auction History By Auction Id
+      parameters:
+      - description: Auction Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Get Auction History By Auction Id
+      tags:
+      - Auction History
+  /auction-histories/user/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Auction History By User Id
+      parameters:
+      - description: User Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Get Auction History By User Id
+      tags:
+      - Auction History
+  /auctions:
+    get:
+      consumes:
+      - application/json
+      description: Get All Auction
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+      summary: Get All Auction
+      tags:
+      - Auction
+    post:
+      consumes:
+      - application/json
+      description: Create Auction
+      parameters:
+      - description: Auction
+        in: body
+        name: auction
+        required: true
+        schema:
+          $ref: '#/definitions/request.AuctionCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+      security:
+      - ApiKeyAuth: []
+      summary: Create Auction
+      tags:
+      - Auction
+  /auctions/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete Auction
+      parameters:
+      - description: Auction Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Auction
+      tags:
+      - Auction
+    get:
+      consumes:
+      - application/json
+      description: Get Auction By Id
+      parameters:
+      - description: Auction Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+      summary: Get Auction By Id
+      tags:
+      - Auction
+    put:
+      consumes:
+      - application/json
+      description: Update Auction
+      parameters:
+      - description: Auction Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Auction
+        in: body
+        name: auction
+        required: true
+        schema:
+          $ref: '#/definitions/request.AuctionUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Update Auction
+      tags:
+      - Auction
+  /history:
+    get:
+      consumes:
+      - application/json
+      description: Get All History
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+      security:
+      - ApiKeyAuth: []
+      summary: Get All History
+      tags:
+      - History
+    post:
+      consumes:
+      - application/json
+      description: Create History
+      parameters:
+      - description: History
+        in: body
+        name: History
+        required: true
+        schema:
+          $ref: '#/definitions/request.HistoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Create History
+      tags:
+      - History
+  /history/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete History
+      parameters:
+      - description: History Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Delete History
+      tags:
+      - History
+    get:
+      consumes:
+      - application/json
+      description: Get History By Id
+      parameters:
+      - description: History Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Get History By Id
+      tags:
+      - History
+    put:
+      consumes:
+      - application/json
+      description: Update History
+      parameters:
+      - description: History Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: History
+        in: body
+        name: History
+        required: true
+        schema:
+          $ref: '#/definitions/request.HistoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Update History
+      tags:
+      - History
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Login
+      parameters:
+      - description: Login Request
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/request.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+      summary: Login
+      tags:
+      - Auth
+  /products:
+    get:
+      consumes:
+      - application/json
+      description: Get All Product
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+      summary: Get All Product
+      tags:
+      - Product
+    post:
+      consumes:
+      - application/json
+      description: Create Product
+      parameters:
+      - description: Product Request
+        in: body
+        name: productRequest
+        required: true
+        schema:
+          $ref: '#/definitions/request.ProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Create Product
+      tags:
+      - Product
+  /products/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get Product By Id
+      parameters:
+      - description: Product Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+      summary: Get Product By Id
+      tags:
+      - Product
+    put:
+      consumes:
+      - application/json
+      description: Update Product
+      parameters:
+      - description: Product Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Product Request
+        in: body
+        name: productRequest
+        required: true
+        schema:
+          $ref: '#/definitions/request.ProductRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      summary: Update Product
+      tags:
+      - Product
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Create User
+      parameters:
+      - description: User Create Request
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Create User
+      tags:
+      - Auth
+  /users:
+    get:
+      consumes:
+      - application/json
+      description: Get All User
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+      security:
+      - ApiKeyAuth: []
+      summary: Get All User
+      tags:
+      - User
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete User
+      parameters:
+      - description: User Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Delete User
+      tags:
+      - User
+    get:
+      consumes:
+      - application/json
+      description: Get User By Id
+      parameters:
+      - description: User Id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+      summary: Get User By Id
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: Update User
+      parameters:
+      - description: User Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User Update Request
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Update User
+      tags:
+      - User
+  /users/{id}/email:
+    put:
+      consumes:
+      - application/json
+      description: Update User Email
+      parameters:
+      - description: User Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User Email Request
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Update User Email
+      tags:
+      - User
+  /users/{id}/role:
+    put:
+      consumes:
+      - application/json
+      description: Update User Role
+      parameters:
+      - description: User Id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User Role Request
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/request.UserRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Update User Role
+      tags:
+      - User
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
