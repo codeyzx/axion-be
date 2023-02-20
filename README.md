@@ -4,8 +4,8 @@ Axion is a simple auction application built with Go and React. It is a simple ap
 
 ## Getting Started
 
-1. Clone the repository: `git clone https://github.com/codeyzx/axion.git`
-2. Navigate to the project directory: `cd axion`
+1. Clone the repository: `git clone https://github.com/codeyzx/axion-be.git`
+2. Navigate to the project directory: `cd axion-be`
 3. Install the dependencies: `go get`
 4. Create mysql database: `axion`
 5. Run the application: `go run main.go`

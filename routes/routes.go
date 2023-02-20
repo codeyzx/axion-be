@@ -1,9 +1,9 @@
 package route
 
 import (
-	"go-fiber-gorm/handler"
-	"go-fiber-gorm/middleware"
-	"go-fiber-gorm/utils"
+	"axion/handler"
+	"axion/middleware"
+	"axion/utils"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/swagger"

@@ -1,6 +1,6 @@
 package request
 
-import "go-fiber-gorm/model/entity"
+import "axion/model/entity"
 
 type UserCreateRequest struct {
 	Name     string      `json:"name" validate:"required"`

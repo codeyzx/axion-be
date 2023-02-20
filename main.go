@@ -1,13 +1,13 @@
 package main
 
 import (
-	"go-fiber-gorm/database"
-	"go-fiber-gorm/database/migration"
+	"axion/database"
+	"axion/database/migration"
 	"log"
 	"os"
 
-	_ "go-fiber-gorm/docs"
-	route "go-fiber-gorm/routes"
+	_ "axion/docs"
+	route "axion/routes"
 
 	"github.com/gofiber/fiber/v2"
 )

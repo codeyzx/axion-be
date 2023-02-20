@@ -1,7 +1,7 @@
 package request
 
 import (
-	"go-fiber-gorm/model/entity"
+	"axion/model/entity"
 )
 
 type AuctionCreateRequest struct {

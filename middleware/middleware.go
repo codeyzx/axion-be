@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"go-fiber-gorm/utils"
+	"axion/utils"
 	"log"
 
 	"github.com/gofiber/fiber/v2"

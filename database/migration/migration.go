@@ -1,9 +1,9 @@
 package migration
 
 import (
+	"axion/database"
+	"axion/model/entity"
 	"fmt"
-	"go-fiber-gorm/database"
-	"go-fiber-gorm/model/entity"
 	"log"
 )
 

@@ -1,5 +1,5 @@
 // +heroku goVersion go1.17
-module go-fiber-gorm
+module axion
 
 go 1.17
 

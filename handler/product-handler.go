@@ -1,11 +1,11 @@
 package handler
 
 import (
+	"axion/database"
+	"axion/model/entity"
+	"axion/model/request"
+	"axion/model/response"
 	"fmt"
-	"go-fiber-gorm/database"
-	"go-fiber-gorm/model/entity"
-	"go-fiber-gorm/model/request"
-	"go-fiber-gorm/model/response"
 	"log"
 
 	"github.com/go-playground/validator/v10"

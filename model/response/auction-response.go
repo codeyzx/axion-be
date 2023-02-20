@@ -1,7 +1,7 @@
 package response
 
 import (
-	"go-fiber-gorm/model/entity"
+	"axion/model/entity"
 	"time"
 
 	"github.com/google/uuid"
