@@ -84,6 +84,16 @@ func LoginHandler(ctx *fiber.Ctx) error {
 	})
 }
 
+// @Summary Check JWT
+// @Description Check JWT
+// @Tags Auth
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Router /check-jwt [get]
+// @Security ApiKeyAuth
 func CheckJWT(ctx *fiber.Ctx) error {
 	token := ctx.Get("Authorization")
 	if token == "" {
@@ -93,28 +103,14 @@ func CheckJWT(ctx *fiber.Ctx) error {
 	}
 
 	_, err := utils.DecodeToken(token)
-
-	// log.Println("err :: ", err.Error())
-
-	// if err.Error() == "Token is expired" {
-	// 	log.Println("err :: ", err)
-	// 	log.Println("token is expired")
-	// 	return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-	// 		"message": "token is expired",
-	// 	})
-	// }
-
 	if err != nil {
 		log.Println("err :: ", err)
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
-			"message": "unauthenticated",
+			"message": "unauthorized",
 		})
 	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "token is valid",
 	})
-
-	// return ctx.Next()
-	// return ctx.Next()
 }
