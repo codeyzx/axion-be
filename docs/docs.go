@@ -1089,7 +1089,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}/email": {
+        "/users/{id}/update-email": {
             "put": {
                 "security": [
                     {
@@ -1144,7 +1144,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/{id}/role": {
+        "/users/{id}/update-role": {
             "put": {
                 "security": [
                     {
@@ -1413,7 +1413,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Auction API Documentation",
-	Description:      "This is a server for a auction application.",
+	Description:      "This is API documentation for Auction project",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

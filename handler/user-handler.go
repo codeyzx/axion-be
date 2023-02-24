@@ -227,7 +227,7 @@ func UserHandlerUpdate(ctx *fiber.Ctx) error {
 // @Failure 401
 // @Failure 403
 // @Failure 404
-// @Router /users/{id}/email [put]
+// @Router /users/{id}/update-email [put]
 // @Security ApiKeyAuth
 func UserHandlerUpdateEmail(ctx *fiber.Ctx) error {
 	userRequest := new(request.UserEmailRequest)
@@ -295,7 +295,7 @@ func UserHandlerUpdateEmail(ctx *fiber.Ctx) error {
 // @Failure 401
 // @Failure 403
 // @Failure 404
-// @Router /users/{id}/role [put]
+// @Router /users/{id}/update-role [put]
 // @Security ApiKeyAuth
 func UserHandlerUpdateRole(ctx *fiber.Ctx) error {
 	userRequest := new(request.UserRoleRequest)

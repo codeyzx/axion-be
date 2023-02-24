@@ -20,6 +20,7 @@ func RouteInit(r *fiber.App) {
 
 	r.Post("/login", handler.LoginHandler)
 	r.Post("/register", middleware.Auth, handler.UserHandlerCreate)
+	r.Get("/check-jwt", handler.CheckJWT)
 
 	r.Get("/users", middleware.Admin, handler.UserHandlerGetAll)
 	r.Get("/users/:id", handler.UserHandlerGetById)

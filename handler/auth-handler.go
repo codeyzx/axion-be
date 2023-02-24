@@ -59,7 +59,7 @@ func LoginHandler(ctx *fiber.Ctx) error {
 	claims["name"] = user.Name
 	claims["email"] = user.Email
 	claims["address"] = user.Address
-	claims["exp"] = time.Now().Add(time.Minute * 24).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
 	switch user.Role {
 	case entity.Admin:
@@ -80,5 +80,41 @@ func LoginHandler(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(fiber.Map{
 		"token": token,
+		"user":  user,
 	})
+}
+
+func CheckJWT(ctx *fiber.Ctx) error {
+	token := ctx.Get("Authorization")
+	if token == "" {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "unauthenticated",
+		})
+	}
+
+	_, err := utils.DecodeToken(token)
+
+	// log.Println("err :: ", err.Error())
+
+	// if err.Error() == "Token is expired" {
+	// 	log.Println("err :: ", err)
+	// 	log.Println("token is expired")
+	// 	return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+	// 		"message": "token is expired",
+	// 	})
+	// }
+
+	if err != nil {
+		log.Println("err :: ", err)
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"message": "unauthenticated",
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "token is valid",
+	})
+
+	// return ctx.Next()
+	// return ctx.Next()
 }

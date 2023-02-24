@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "This is a server for a auction application.",
+        "description": "This is API documentation for Auction project",
         "title": "Auction API Documentation",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
@@ -1082,7 +1082,7 @@
                 }
             }
         },
-        "/users/{id}/email": {
+        "/users/{id}/update-email": {
             "put": {
                 "security": [
                     {
@@ -1137,7 +1137,7 @@
                 }
             }
         },
-        "/users/{id}/role": {
+        "/users/{id}/update-role": {
             "put": {
                 "security": [
                     {

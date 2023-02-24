@@ -135,7 +135,7 @@ info:
   contact:
     email: yahyatruth@gmail.com
     name: API Support
-  description: This is a server for a auction application.
+  description: This is API documentation for Auction project
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
@@ -822,7 +822,7 @@ paths:
       summary: Update User
       tags:
       - User
-  /users/{id}/email:
+  /users/{id}/update-email:
     put:
       consumes:
       - application/json
@@ -857,7 +857,7 @@ paths:
       summary: Update User Email
       tags:
       - User
-  /users/{id}/role:
+  /users/{id}/update-role:
     put:
       consumes:
       - application/json
