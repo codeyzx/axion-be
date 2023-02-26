@@ -45,3 +45,4 @@ __local/
 # Misc
 .cache/
 tmp/
+public/
