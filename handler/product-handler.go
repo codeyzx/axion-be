@@ -160,7 +160,8 @@ func ProductHandlerUpdate(ctx *fiber.Ctx) error {
 	pathFile := ctx.Locals("pathFile")
 
 	if pathFile == nil {
-		pathFileString = ""
+		// pathFileString = ""
+		pathFileString = Product.Image
 
 	} else {
 		pathFileString = fmt.Sprintf("%v", pathFile)
