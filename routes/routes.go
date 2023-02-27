@@ -46,6 +46,7 @@ func RouteInit(r *fiber.App) {
 	r.Get("/products/:id", handler.ProductHandlerGetById)
 	r.Post("/products", middleware.Operator, utils.HandleSingleFile, handler.ProductHandlerCreate)
 	r.Put("/products/:id", middleware.ByID, utils.HandleSingleFile, handler.ProductHandlerUpdate)
+	r.Delete("/products/:id", middleware.ByID, handler.ProductHandlerDelete)
 
 	r.Get("/history", middleware.Admin, handler.HistoryHandlerGetAll)
 	r.Get("/history/:id", middleware.Admin, handler.HistoryHandlerGetById)

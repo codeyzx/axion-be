@@ -160,7 +160,6 @@ func ProductHandlerUpdate(ctx *fiber.Ctx) error {
 	pathFile := ctx.Locals("pathFile")
 
 	if pathFile == nil {
-		// pathFileString = ""
 		pathFileString = Product.Image
 
 	} else {
@@ -168,18 +167,9 @@ func ProductHandlerUpdate(ctx *fiber.Ctx) error {
 	}
 
 	Product.Image = pathFileString
-
-	if ProductRequest.Price != 0 {
-		Product.Price = ProductRequest.Price
-	}
-
-	if ProductRequest.Description != "" {
-		Product.Description = ProductRequest.Description
-	}
-
-	if ProductRequest.Name != "" {
-		Product.Name = ProductRequest.Name
-	}
+	Product.Price = ProductRequest.Price
+	Product.Description = ProductRequest.Description
+	Product.Name = ProductRequest.Name
 
 	log.Println("userId", userId)
 	if userId != 0 {
@@ -216,45 +206,71 @@ func ProductHandlerUpdate(ctx *fiber.Ctx) error {
 	})
 }
 
-// func ProductHandlerDelete(ctx *fiber.Ctx) error {
-// 	ID := ctx.Params("id")
-// 	var Product entity.Product
+// @Summary Delete Product
+// @Description Delete Product
+// @Tags Product
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Product Id"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Failure 500
+// @Router /products/{id} [delete]
+// @Security ApiKeyAuth
+func ProductHandlerDelete(ctx *fiber.Ctx) error {
+	ID := ctx.Params("id")
+	var Product entity.Product
 
-// 	userId := ctx.Locals("userId")
+	userId := ctx.Locals("userId")
 
-// 	err := database.DB.Debug().First(&Product, "id=?", ID).Error
-// 	if err != nil {
-// 		return ctx.Status(404).JSON(fiber.Map{
-// 			"message": "Product not found",
-// 		})
-// 	}
+	err := database.DB.Debug().First(&Product, "id=?", ID).Error
+	if err != nil {
+		return ctx.Status(404).JSON(fiber.Map{
+			"message": "Product not found",
+		})
+	}
 
-// 	log.Println("userId", userId)
-// 	if userId != 0 {
-// 		result := database.DB.Debug().Exec("CALL delete_product(?, ?)", Product.ID, userId)
+	log.Println("userId", userId)
+	if userId != 0 {
+		var Auction entity.Auction
+		errAuction := database.DB.Debug().First(&Auction, "product_id=? AND user_id=?", ID, userId).Error
 
-// 		if result.Error != nil {
-// 			return ctx.Status(500).JSON(fiber.Map{
-// 				"message": "internal server error",
-// 			})
-// 		}
+		if errAuction != nil {
+			return ctx.Status(500).JSON(fiber.Map{
+				"message": "unauthorized",
+			})
+		}
 
-// 		if result.RowsAffected == 0 {
-// 			return ctx.Status(500).JSON(fiber.Map{
-// 				"message": "cannot delete product",
-// 			})
-// 		}
+		errDeleteAuction := database.DB.Debug().Model(&Product).Association("Auctions").Delete(&Auction)
+		errDeleteProduct := database.DB.Debug().Delete(&Product).Error
+		if errDeleteAuction != nil || errDeleteProduct != nil {
+			return ctx.Status(500).JSON(fiber.Map{
+				"message": "internal server error",
+			})
+		}
 
-// 	} else {
-// 		errDelete := database.DB.Debug().Delete(&Product).Error
-// 		if errDelete != nil {
-// 			return ctx.Status(500).JSON(fiber.Map{
-// 				"message": "internal server error",
-// 			})
-// 		}
-// 	}
+	} else {
+		var Auction entity.Auction
+		errAuction := database.DB.Debug().First(&Auction, "product_id=?", ID).Error
 
-// 	return ctx.JSON(fiber.Map{
-// 		"message": "Product was deleted",
-// 	})
-// }
+		if errAuction != nil {
+			return ctx.Status(500).JSON(fiber.Map{
+				"message": "product not found in auction",
+			})
+		}
+
+		errDeleteAuction := database.DB.Debug().Model(&Product).Association("Auctions").Delete(&Auction)
+		errDeleteProduct := database.DB.Debug().Delete(&Product).Error
+		if errDeleteAuction != nil || errDeleteProduct != nil {
+			return ctx.Status(500).JSON(fiber.Map{
+				"message": "internal server error",
+			})
+		}
+	}
+
+	return ctx.JSON(fiber.Map{
+		"message": "Product was deleted",
+	})
+}
