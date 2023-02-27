@@ -23,9 +23,12 @@ import (
 // @Router /auction-histories [get]
 // @Security ApiKeyAuth
 func AuctionHistoryHandlerGetAll(ctx *fiber.Ctx) error {
-	var histories []entity.AuctionHistory
+	var histories []response.AuctionHistory
 
-	result := database.DB.Debug().Find(&histories)
+	// result := database.DB.Debug().Find(&histories)
+	// result := database.DB.Table("auction_histories").Preload("Auction.Product").Preload("Auction.User").Find(&histories)
+	// get auction histories with product name, user name, and auction user name
+	result := database.DB.Table("auction_histories").Select("auction_histories.id, auction_histories.auction_id, auction_histories.user_id, auction_histories.price, auction_histories.created_at, auction_histories.updated_at, auctions.name as auction_name, users.name as user_name").Joins("left join auctions on auctions.id = auction_histories.auction_id").Joins("left join products on products.id = auctions.product_id").Joins("left join users on users.id = auction_histories.user_id").Find(&histories)
 	if result.Error != nil {
 		log.Println(result.Error)
 	}
@@ -47,7 +50,7 @@ func AuctionHistoryHandlerGetAll(ctx *fiber.Ctx) error {
 func AuctionHistoryHandlerGetById(ctx *fiber.Ctx) error {
 	ID := ctx.Params("id")
 
-	var auction response.AuctionHistory
+	var auction entity.AuctionHistory
 
 	err := database.DB.Table("auction_histories").Where("auction_histories.id = ?", ID).Preload("Auction.Product").Preload("Auction.User").Preload("User").First(&auction).Error
 
@@ -83,7 +86,7 @@ func AuctionHistoryHandlerGetByUser(ctx *fiber.Ctx) error {
 
 	authId := fmt.Sprintf("%v", temp)
 
-	var auction []response.AuctionHistory
+	var auction []entity.AuctionHistory
 
 	log.Println(ID + " " + authId)
 	if temp != 0 {
@@ -108,24 +111,28 @@ func AuctionHistoryHandlerGetByUser(ctx *fiber.Ctx) error {
 	})
 }
 
-// @Summary Get Auction History By Auction Id
-// @Description Get Auction History By Auction Id
+// @Summary Create Auction History
+// @Description Create Auction History
 // @Tags Auction History
 // @Accept  json
 // @Produce  json
-// @Param id path string true "Auction Id"
+// @Param auction body request.AuctionHistoryCreateRequest true "Auction History"
 // @Success 200
 // @Failure 400
 // @Failure 401
 // @Failure 403
 // @Failure 404
-// @Router /auction-histories/auction/{id} [get]
+// @Router /auction-histories [post]
 // @Security ApiKeyAuth
 func AuctionHistoryHandlerCreate(ctx *fiber.Ctx) error {
 	auction := new(request.AuctionHistoryCreateRequest)
 	if err := ctx.BodyParser(auction); err != nil {
-		return err
+		return ctx.Status(400).JSON(fiber.Map{
+			"message": "failed",
+			"error":   err.Error(),
+		})
 	}
+	log.Println("ini auction : ", auction)
 
 	validate := validator.New()
 	errValidate := validate.Struct(auction)
@@ -135,6 +142,10 @@ func AuctionHistoryHandlerCreate(ctx *fiber.Ctx) error {
 			"error":   errValidate.Error(),
 		})
 	}
+
+	log.Println("auction: ", auction)
+	log.Println("auction: ", auction.AuctionID)
+	log.Println("auction: ", auction.UserId)
 
 	newAuctionHistory := entity.AuctionHistory{
 		AuctionID: auction.AuctionID,
@@ -161,6 +172,7 @@ func AuctionHistoryHandlerCreate(ctx *fiber.Ctx) error {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "Auction History Id"
+// @Param auction body request.AuctionHistoryUpdateRequest true "Auction History"
 // @Success 200
 // @Failure 400
 // @Failure 401
@@ -169,7 +181,7 @@ func AuctionHistoryHandlerCreate(ctx *fiber.Ctx) error {
 // @Router /auction-histories/{id} [put]
 // @Security ApiKeyAuth
 func AuctionHistoryHandlerUpdate(ctx *fiber.Ctx) error {
-	auctionRequest := new(request.AuctionHistoryCreateRequest)
+	auctionRequest := new(request.AuctionHistoryUpdateRequest)
 	if err := ctx.BodyParser(auctionRequest); err != nil {
 		return ctx.Status(400).JSON(fiber.Map{
 			"message": "bad request",
@@ -187,16 +199,7 @@ func AuctionHistoryHandlerUpdate(ctx *fiber.Ctx) error {
 		})
 	}
 
-	if auctionRequest.AuctionID != 0 {
-		auction.AuctionID = auctionRequest.AuctionID
-	}
-
-	if auctionRequest.UserId != 0 {
-		auction.UserId = auctionRequest.UserId
-	}
-	if auctionRequest.Price != 0 {
-		auction.Price = auctionRequest.Price
-	}
+	auction.Price = auctionRequest.Price
 
 	errUpdate := database.DB.Save(&auction).Error
 	if errUpdate != nil {
@@ -231,7 +234,7 @@ func AuctionHistoryHandlerDelete(ctx *fiber.Ctx) error {
 	err := database.DB.Debug().First(&auction, "id=?", ID).Error
 	if err != nil {
 		return ctx.Status(404).JSON(fiber.Map{
-			"message": "auction not found",
+			"message": "transaction not found",
 		})
 	}
 
@@ -243,6 +246,6 @@ func AuctionHistoryHandlerDelete(ctx *fiber.Ctx) error {
 	}
 
 	return ctx.JSON(fiber.Map{
-		"message": "auction was deleted",
+		"message": "transaction was deleted",
 	})
 }

@@ -52,16 +52,14 @@ const docTemplate = `{
                         "description": "Unauthorized"
                     }
                 }
-            }
-        },
-        "/auction-histories/auction/{id}": {
-            "get": {
+            },
+            "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get Auction History By Auction Id",
+                "description": "Create Auction History",
                 "consumes": [
                     "application/json"
                 ],
@@ -71,14 +69,16 @@ const docTemplate = `{
                 "tags": [
                     "Auction History"
                 ],
-                "summary": "Get Auction History By Auction Id",
+                "summary": "Create Auction History",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Auction Id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                        "description": "Auction History",
+                        "name": "auction",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AuctionHistoryCreateRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -207,6 +207,15 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Auction History",
+                        "name": "auction",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.AuctionHistoryUpdateRequest"
+                        }
                     }
                 ],
                 "responses": {
@@ -1303,26 +1312,62 @@ const docTemplate = `{
         "request.AuctionCreateRequest": {
             "type": "object",
             "required": [
-                "product",
-                "user_id"
+                "name",
+                "price",
+                "productName",
+                "userId"
             ],
             "properties": {
-                "bidders_count": {
+                "biddersCount": {
                     "type": "integer"
                 },
-                "end_at": {
+                "description": {
                     "type": "string"
                 },
-                "last_price": {
+                "endAt": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "lastPrice": {
                     "type": "integer"
                 },
-                "product": {
-                    "$ref": "#/definitions/request.Product"
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "productName": {
+                    "type": "string"
                 },
                 "status": {
                     "type": "string"
                 },
-                "user_id": {
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.AuctionHistoryCreateRequest": {
+            "type": "object",
+            "properties": {
+                "auctionId": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "request.AuctionHistoryUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "price": {
                     "type": "integer"
                 }
             }
@@ -1330,16 +1375,19 @@ const docTemplate = `{
         "request.AuctionUpdateRequest": {
             "type": "object",
             "properties": {
-                "end_at": {
+                "endAt": {
                     "type": "string"
                 },
-                "last_price": {
+                "lastPrice": {
                     "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "status": {
                     "$ref": "#/definitions/entity.Status"
                 },
-                "user_id": {
+                "userId": {
                     "type": "integer"
                 }
             }
@@ -1364,27 +1412,6 @@ const docTemplate = `{
                 },
                 "password": {
                     "type": "string"
-                }
-            }
-        },
-        "request.Product": {
-            "type": "object",
-            "required": [
-                "name",
-                "price"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "integer"
                 }
             }
         },

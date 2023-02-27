@@ -10,6 +10,7 @@ import (
 
 type Auction struct {
 	ID             uint             `json:"id" gorm:"primaryKey"`
+	Name           string           `json:"name"`
 	LastPrice      int              `json:"last_price"`
 	Status         entity.Status    `json:"status"`
 	BiddersCount   int              `json:"bidders_count"`

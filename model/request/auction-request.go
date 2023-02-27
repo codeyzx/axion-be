@@ -5,17 +5,23 @@ import (
 )
 
 type AuctionCreateRequest struct {
-	LastPrice    int     `json:"last_price"`
-	Status       string  `json:"status"`
-	BiddersCount int     `json:"bidders_count"`
-	UserId       uint    `json:"user_id" form:"user_id" validate:"required"`
-	Product      Product `json:"product" validate:"required"`
-	EndAt        string  `json:"end_at"`
+	Name         string `json:"name" form:"name" validate:"required"`
+	LastPrice    int    `json:"lastPrice"`
+	Status       string `json:"status"`
+	BiddersCount int    `json:"biddersCount"`
+	UserId       uint   `json:"userId" form:"userId" validate:"required"`
+	EndAt        string `json:"endAt"`
+	ProductName  string `json:"productName" validate:"required"`
+	Description  string `json:"description"`
+	Price        int    `json:"price" validate:"required"`
+	Image        string `json:"image"`
+	// Product      Product `json:"product" validate:"required"`
 }
 
 type AuctionUpdateRequest struct {
-	LastPrice int           `json:"last_price"`
-	UserId    uint          `json:"user_id"`
+	Name      string        `json:"name"`
+	LastPrice int           `json:"lastPrice"`
+	UserId    uint          `json:"userId"`
 	Status    entity.Status `json:"status"`
-	EndAt     string        `json:"end_at"`
+	EndAt     string        `json:"endAt"`
 }

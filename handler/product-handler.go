@@ -243,7 +243,7 @@ func ProductHandlerDelete(ctx *fiber.Ctx) error {
 			})
 		}
 
-		errDeleteAuction := database.DB.Debug().Model(&Product).Association("Auctions").Delete(&Auction)
+		errDeleteAuction := database.DB.Debug().Model(&Product).Association("Auctions").Delete(&Auction).Error
 		errDeleteProduct := database.DB.Debug().Delete(&Product).Error
 		if errDeleteAuction != nil || errDeleteProduct != nil {
 			return ctx.Status(500).JSON(fiber.Map{
@@ -255,15 +255,18 @@ func ProductHandlerDelete(ctx *fiber.Ctx) error {
 		var Auction entity.Auction
 		errAuction := database.DB.Debug().First(&Auction, "product_id=?", ID).Error
 
-		if errAuction != nil {
-			return ctx.Status(500).JSON(fiber.Map{
-				"message": "product not found in auction",
-			})
+		if errAuction == nil {
+			errDeleteAuction := database.DB.Debug().Model(&Product).Association("Auctions").Delete(&Auction)
+
+			if errDeleteAuction != nil {
+				return ctx.Status(500).JSON(fiber.Map{
+					"message": "internal server error",
+				})
+			}
 		}
 
-		errDeleteAuction := database.DB.Debug().Model(&Product).Association("Auctions").Delete(&Auction)
 		errDeleteProduct := database.DB.Debug().Delete(&Product).Error
-		if errDeleteAuction != nil || errDeleteProduct != nil {
+		if errDeleteProduct != nil {
 			return ctx.Status(500).JSON(fiber.Map{
 				"message": "internal server error",
 			})

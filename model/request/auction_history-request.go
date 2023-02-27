@@ -1,7 +1,11 @@
 package request
 
 type AuctionHistoryCreateRequest struct {
-	AuctionID uint `json:"auction_id"`
-	UserId    uint `json:"user_id"`
+	AuctionID uint `json:"auctionId"`
+	UserId    uint `json:"userId"`
 	Price     int  `json:"price"`
+}
+
+type AuctionHistoryUpdateRequest struct {
+	Price int `json:"price"`
 }

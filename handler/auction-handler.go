@@ -49,7 +49,7 @@ func AuctionHandlerGetById(ctx *fiber.Ctx) error {
 
 	var auction response.Auction
 
-	err := database.DB.Where("auctions.id = ?", ID).Preload("Product").Preload("User").Preload("AuctionHistory.User").First(&auction).Error
+	err := database.DB.Where("auctions.id = ?", ID).Preload("Product").Preload("User").Preload("AuctionHistory").First(&auction).Error
 
 	if err != nil {
 		return ctx.Status(404).JSON(fiber.Map{
@@ -78,19 +78,19 @@ func AuctionHandlerCreate(ctx *fiber.Ctx) error {
 
 	productId := uuid.New()
 	auction := new(request.AuctionCreateRequest)
-
 	if err := ctx.BodyParser(auction); err != nil {
 		return ctx.Status(400).JSON(fiber.Map{
-			"message": "failed",
+			"message": "failed to parse request body",
 			"error":   err.Error(),
 		})
 	}
 
+	log.Println("auction : ", auction)
 	validate := validator.New()
 	errValidate := validate.Struct(auction)
 	if errValidate != nil {
 		return ctx.Status(400).JSON(fiber.Map{
-			"message": "failed",
+			"message": "failed to validate request body",
 			"error":   errValidate.Error(),
 		})
 	}
@@ -105,22 +105,18 @@ func AuctionHandlerCreate(ctx *fiber.Ctx) error {
 	}
 
 	newProduct := entity.Product{
-
 		ID:          productId,
-		Name:        auction.Product.Name,
-		Description: auction.Product.Description,
-		Price:       auction.Product.Price,
-
-		Image: pathFileString,
+		Name:        auction.ProductName,
+		Description: auction.Description,
+		Price:       auction.Price,
+		Image:       pathFileString,
 	}
 
 	newAuction := entity.Auction{
-
-		ProductID: productId,
-
-		LastPrice: auction.Product.Price,
-		UserId:    auction.UserId,
-
+		Name:         auction.Name,
+		ProductID:    productId,
+		LastPrice:    auction.Price,
+		UserId:       auction.UserId,
 		Status:       entity.Open,
 		BiddersCount: auction.BiddersCount,
 		EndAt:        auction.EndAt,
@@ -181,6 +177,10 @@ func AuctionHandlerUpdate(ctx *fiber.Ctx) error {
 			})
 		}
 		auction.Status = auctionRequest.Status
+	}
+
+	if auctionRequest.Name != "" {
+		auction.Name = auctionRequest.Name
 	}
 
 	if auctionRequest.LastPrice != 0 {
