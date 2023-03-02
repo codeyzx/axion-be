@@ -7,10 +7,14 @@ import (
 	"axion/model/response"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/signintech/gopdf"
+	"github.com/xuri/excelize/v2"
 )
 
 // @Summary Get All Product
@@ -276,4 +280,223 @@ func ProductHandlerDelete(ctx *fiber.Ctx) error {
 	return ctx.JSON(fiber.Map{
 		"message": "Product was deleted",
 	})
+}
+
+// @Summary Export Product to Excel
+// @Description Export Product to Excel
+// @Tags Product
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 403
+// @Failure 404
+// @Router /products-export-excel [get]
+// @Security ApiKeyAuth
+func ProductExportToExcel(c *fiber.Ctx) error {
+	var Products []entity.Product
+
+	result := database.DB.Debug().Find(&Products)
+	if result.Error != nil {
+		log.Println(result.Error)
+	}
+
+	file := excelize.NewFile()
+	const sheet = "Products"
+
+	index, err := file.NewSheet(sheet)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"message": "failed to create sheet",
+		})
+	}
+
+	file.SetCellValue(sheet, "A1", "ID")
+	file.SetCellValue(sheet, "B1", "Name")
+	file.SetCellValue(sheet, "C1", "Description")
+	file.SetCellValue(sheet, "D1", "Price")
+	file.SetCellValue(sheet, "E1", "Image")
+
+	style, err := file.NewStyle(&excelize.Style{
+		Font: &excelize.Font{
+			Bold: true,
+		},
+	})
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"message": "failed to create style",
+		})
+	}
+
+	file.SetCellStyle(sheet, "A1", "F1", style)
+
+	for i, Product := range Products {
+		i = i + 2
+		file.SetCellValue(sheet, "A"+strconv.Itoa(i), Product.ID)
+		file.SetCellValue(sheet, "B"+strconv.Itoa(i), Product.Name)
+		file.SetCellValue(sheet, "C"+strconv.Itoa(i), Product.Description)
+		file.SetCellValue(sheet, "D"+strconv.Itoa(i), Product.Price)
+
+		graphicOptions := excelize.GraphicOptions{
+			AutoFit: true,
+		}
+		if Product.Image != "" {
+			var imagePath = strings.Replace(Product.Image, "./public/covers/", "", -1)
+			errImage := file.AddPicture(sheet, "E"+strconv.Itoa(i), "/home/codeyzx/Data/programming/go/axion-be/public/covers/"+imagePath, &graphicOptions)
+
+			if errImage != nil {
+				fmt.Println("err:::", errImage)
+			}
+		}
+	}
+
+	file.SetColWidth(sheet, "A", "A", 20)
+	file.SetColWidth(sheet, "B", "B", 30)
+	file.SetColWidth(sheet, "C", "C", 30)
+	file.SetColWidth(sheet, "D", "D", 30)
+	file.SetColWidth(sheet, "E", "E", 30)
+
+	file.SetActiveSheet(index)
+
+	c.Set("Content-Disposition", "attachment; filename=transaction-report.xlsx")
+	c.Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+	errWrite := file.Write(c.Response().BodyWriter())
+	if errWrite != nil {
+		return errWrite
+	}
+	return nil
+}
+
+// @Summary Export Product to PDF
+// @Description Export Product to PDF
+// @Tags Product
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 403
+// @Failure 404
+// @Router /products-export-pdf [get]
+// @Security ApiKeyAuth
+func ProductExportToPDF(c *fiber.Ctx) error {
+	var Products []entity.Product
+
+	result := database.DB.Debug().Find(&Products)
+	if result.Error != nil {
+		log.Println(result.Error)
+	}
+
+	file := excelize.NewFile()
+	const sheet = "Products"
+
+	index, err := file.NewSheet(sheet)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"message": "failed to create sheet",
+		})
+	}
+
+	file.SetCellValue(sheet, "A1", "Image")
+	file.SetCellValue(sheet, "B1", "Name")
+	file.SetCellValue(sheet, "C1", "Price")
+
+	style, err := file.NewStyle(&excelize.Style{
+		Font: &excelize.Font{
+			Bold: true,
+		},
+	})
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"message": "failed to create style",
+		})
+	}
+
+	file.SetCellStyle(sheet, "A1", "C1", style)
+
+	for i, Product := range Products {
+		i = i + 2
+
+		file.SetCellValue(sheet, "A"+strconv.Itoa(i), Product.Image)
+		file.SetCellValue(sheet, "B"+strconv.Itoa(i), Product.Name)
+		file.SetCellValue(sheet, "C"+strconv.Itoa(i), Product.Price)
+		graphicOptions := excelize.GraphicOptions{
+			AutoFit: true,
+		}
+		if Product.Image != "" {
+			var imagePath = strings.Replace(Product.Image, "./public/covers/", "", -1)
+			errImage := file.AddPicture(sheet, "C"+strconv.Itoa(i), "/home/codeyzx/Data/programming/go/axion-be/public/covers/"+imagePath, &graphicOptions)
+
+			if errImage != nil {
+				fmt.Println("err:::", errImage)
+			}
+		}
+	}
+
+	file.SetColWidth(sheet, "A", "A", 20)
+	file.SetColWidth(sheet, "B", "B", 30)
+	file.SetColWidth(sheet, "C", "C", 30)
+
+	file.SetActiveSheet(index)
+
+	pdf := gopdf.GoPdf{}
+	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
+
+	errFont := pdf.AddTTFFont("poppins", "/home/codeyzx/Data/programming/go/axion-be/assets/fonts/Poppins-Medium.ttf")
+	if errFont != nil {
+		log.Println("failed to add font")
+	}
+	errFont = pdf.SetFont("poppins", "", 12)
+	if errFont != nil {
+		log.Println("failed to set font")
+	}
+
+	pdf.AddPage()
+
+	r, err := file.GetRows(sheet)
+	for row, rowCells := range r {
+		for _, cell := range rowCells {
+
+			if row > 0 && cell != "" && rowCells[0] != "" && strings.Contains(cell, "./public/covers/") {
+
+				errImage := pdf.Image(cell, pdf.GetX(), pdf.GetY(), &gopdf.Rect{W: 50, H: 50})
+				if errImage != nil {
+					log.Println("errImage::", errImage)
+				}
+				pdf.SetX(pdf.GetX() + 50)
+				pdf.SetY(pdf.GetY() + 10)
+				continue
+			}
+
+			err = pdf.Cell(nil, cell)
+			if err != nil {
+				log.Println(err)
+			}
+
+			pdf.SetX(pdf.GetX() + 50)
+			pdf.SetY(pdf.GetY() + 10)
+		}
+
+		pdf.Br(30)
+		pdf.SetX(20)
+
+		if row%20 == 19 {
+			pdf.AddPage()
+			pdf.SetX(20)
+		}
+
+	}
+
+	c.Set("Content-Disposition", "attachment; filename=history-report.pdf")
+	c.Set("Content-Type", "application/pdf")
+	errWrite := pdf.Write(c.Response().BodyWriter())
+	if errWrite != nil {
+		return errWrite
+	}
+	return nil
+
 }

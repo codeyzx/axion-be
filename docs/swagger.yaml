@@ -203,6 +203,52 @@ paths:
       summary: Create Auction History
       tags:
       - Auction History
+  /auction-histories-export-excel:
+    get:
+      consumes:
+      - application/json
+      description: Export Auction History to Excel
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Export Auction History to Excel
+      tags:
+      - Auction History
+  /auction-histories-export-pdf:
+    get:
+      consumes:
+      - application/json
+      description: Export Auction History to PDF
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Export Auction History to PDF
+      tags:
+      - Auction History
   /auction-histories/{id}:
     delete:
       consumes:
@@ -361,6 +407,52 @@ paths:
       summary: Create Auction
       tags:
       - Auction
+  /auctions-export-excel:
+    get:
+      consumes:
+      - application/json
+      description: Export Auction to Excel
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Export Auction to Excel
+      tags:
+      - Auction
+  /auctions-export-pdf:
+    get:
+      consumes:
+      - application/json
+      description: Export Auction to PDF
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Export Auction to PDF
+      tags:
+      - Auction
   /auctions/{id}:
     delete:
       consumes:
@@ -511,6 +603,52 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create History
+      tags:
+      - History
+  /history-export-excel:
+    get:
+      consumes:
+      - application/json
+      description: Export History to Excel
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Export History to Excel
+      tags:
+      - History
+  /history-export-pdf:
+    get:
+      consumes:
+      - application/json
+      description: Export History to PDF
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Export History to PDF
       tags:
       - History
   /history/{id}:
@@ -666,6 +804,52 @@ paths:
       summary: Create Product
       tags:
       - Product
+  /products-export-excel:
+    get:
+      consumes:
+      - application/json
+      description: Export Product to Excel
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Export Product to Excel
+      tags:
+      - Product
+  /products-export-pdf:
+    get:
+      consumes:
+      - application/json
+      description: Export Product to PDF
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Export Product to PDF
+      tags:
+      - Product
   /products/{id}:
     delete:
       consumes:
@@ -798,6 +982,52 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get All User
+      tags:
+      - User
+  /users-export-excel:
+    get:
+      consumes:
+      - application/json
+      description: Export Users to Excel
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Export Users to Excel
+      tags:
+      - User
+  /users-export-pdf:
+    get:
+      consumes:
+      - application/json
+      description: Export Users to PDF
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - ApiKeyAuth: []
+      summary: Export Users to PDF
       tags:
       - User
   /users/{id}:

@@ -7,10 +7,14 @@ import (
 	"axion/model/response"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/signintech/gopdf"
+	"github.com/xuri/excelize/v2"
 )
 
 // @Summary Get All Auction
@@ -242,4 +246,228 @@ func AuctionHandlerDelete(ctx *fiber.Ctx) error {
 	return ctx.JSON(fiber.Map{
 		"message": "auction was deleted",
 	})
+}
+
+// @Summary Export Auction to Excel
+// @Description Export Auction to Excel
+// @Tags Auction
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 403
+// @Failure 404
+// @Router /auctions-export-excel [get]
+// @Security ApiKeyAuth
+func AuctionExportToExcel(c *fiber.Ctx) error {
+	var auctions []response.Auction
+
+	result := database.DB.Preload("Product").Preload("User").Find(&auctions)
+	if result.Error != nil {
+		log.Println(result.Error)
+	}
+
+	file := excelize.NewFile()
+	const sheet = "Auctions"
+
+	index, err := file.NewSheet(sheet)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"message": "failed to create sheet",
+		})
+	}
+
+	file.SetCellValue(sheet, "A1", "ID")
+	file.SetCellValue(sheet, "B1", "Name")
+	file.SetCellValue(sheet, "C1", "Last Price")
+	file.SetCellValue(sheet, "D1", "Status")
+	file.SetCellValue(sheet, "E1", "Bidders")
+	file.SetCellValue(sheet, "F1", "User")
+	file.SetCellValue(sheet, "G1", "Product")
+	file.SetCellValue(sheet, "H1", "Image")
+	file.SetCellValue(sheet, "I1", "End At")
+
+	style, err := file.NewStyle(&excelize.Style{
+		Font: &excelize.Font{
+			Bold: true,
+		},
+	})
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"message": "failed to create style",
+		})
+	}
+
+	file.SetCellStyle(sheet, "A1", "I1", style)
+
+	for i, auction := range auctions {
+		i = i + 2
+		file.SetCellValue(sheet, "A"+strconv.Itoa(i), auction.ID)
+		file.SetCellValue(sheet, "B"+strconv.Itoa(i), auction.Name)
+		file.SetCellValue(sheet, "C"+strconv.Itoa(i), auction.LastPrice)
+		file.SetCellValue(sheet, "D"+strconv.Itoa(i), auction.Status)
+		file.SetCellValue(sheet, "E"+strconv.Itoa(i), auction.BiddersCount)
+		file.SetCellValue(sheet, "F"+strconv.Itoa(i), auction.User.Name)
+		file.SetCellValue(sheet, "G"+strconv.Itoa(i), auction.Product.Name)
+		file.SetCellValue(sheet, "I"+strconv.Itoa(i), auction.EndAt)
+
+		graphicOptions := excelize.GraphicOptions{
+			AutoFit: true,
+		}
+
+		log.Println(auction.Product)
+		if auction.Product.Image != "" {
+			var imagePath = strings.Replace(auction.Product.Image, "./public/covers/", "", -1)
+			errImage := file.AddPicture(sheet, "H"+strconv.Itoa(i), "/home/codeyzx/Data/programming/go/axion-be/public/covers/"+imagePath, &graphicOptions)
+
+			if errImage != nil {
+				fmt.Println("err:::", errImage)
+			}
+		}
+	}
+
+	file.SetColWidth(sheet, "A", "A", 10)
+	file.SetColWidth(sheet, "B", "B", 20)
+	file.SetColWidth(sheet, "C", "C", 20)
+	file.SetColWidth(sheet, "D", "D", 20)
+	file.SetColWidth(sheet, "E", "E", 20)
+	file.SetColWidth(sheet, "F", "F", 20)
+	file.SetColWidth(sheet, "G", "G", 20)
+	file.SetColWidth(sheet, "H", "H", 20)
+	file.SetColWidth(sheet, "I", "I", 20)
+
+	file.SetActiveSheet(index)
+
+	c.Set("Content-Disposition", "attachment; filename=auction-report.xlsx")
+	c.Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+	errWrite := file.Write(c.Response().BodyWriter())
+	if errWrite != nil {
+		return errWrite
+	}
+	return nil
+}
+
+// @Summary Export Auction to PDF
+// @Description Export Auction to PDF
+// @Tags Auction
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 403
+// @Failure 404
+// @Router /auctions-export-pdf [get]
+// @Security ApiKeyAuth
+func AuctionExportToPDF(c *fiber.Ctx) error {
+	var auctions []response.Auction
+
+	result := database.DB.Preload("Product").Preload("User").Find(&auctions)
+	if result.Error != nil {
+		log.Println(result.Error)
+	}
+
+	var auctionNames []string
+	for _, auction := range auctions {
+		if auction.Name == "" {
+			auction.Name = "-"
+		}
+		auctionNames = append(auctionNames, auction.Name)
+	}
+
+	file := excelize.NewFile()
+	const sheet = "Auctions"
+
+	index, err := file.NewSheet(sheet)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"message": "failed to create sheet",
+		})
+	}
+
+	file.SetCellValue(sheet, "A1", "Name")
+	file.SetCellValue(sheet, "B1", "Last Price")
+	file.SetCellValue(sheet, "C1", "Status")
+	file.SetCellValue(sheet, "D1", "Product")
+
+	style, err := file.NewStyle(&excelize.Style{
+		Font: &excelize.Font{
+			Bold: true,
+		},
+	})
+
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{
+			"message": "failed to create style",
+		})
+	}
+
+	file.SetCellStyle(sheet, "A1", "D1", style)
+
+	for i, auction := range auctions {
+
+		j := i + 2
+		file.SetCellValue(sheet, "A"+strconv.Itoa(j), auctionNames[i])
+		file.SetCellValue(sheet, "B"+strconv.Itoa(j), auction.LastPrice)
+		file.SetCellValue(sheet, "C"+strconv.Itoa(j), auction.Status)
+		file.SetCellValue(sheet, "D"+strconv.Itoa(j), auction.Product.Name)
+	}
+
+	file.SetColWidth(sheet, "A", "A", 10)
+	file.SetColWidth(sheet, "B", "B", 20)
+	file.SetColWidth(sheet, "C", "C", 20)
+	file.SetColWidth(sheet, "D", "D", 20)
+
+	file.SetActiveSheet(index)
+
+	pdf := gopdf.GoPdf{}
+	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
+
+	errFont := pdf.AddTTFFont("poppins", "/home/codeyzx/Data/programming/go/axion-be/assets/fonts/Poppins-Medium.ttf")
+	if errFont != nil {
+		log.Println("failed to add font")
+	}
+	errFont = pdf.SetFont("poppins", "", 12)
+	if errFont != nil {
+		log.Println("failed to set font")
+	}
+
+	pdf.AddPage()
+
+	r, err := file.GetRows(sheet)
+	for row, rowCells := range r {
+		for _, cell := range rowCells {
+
+			err = pdf.Cell(nil, cell)
+			if err != nil {
+				log.Println(err)
+			}
+
+			if cell == "-" {
+				pdf.SetX(pdf.GetX() + 100)
+			} else {
+				pdf.SetX(pdf.GetX() + 50)
+			}
+		}
+
+		pdf.Br(30)
+		pdf.SetX(20)
+
+		if row%20 == 19 {
+			pdf.AddPage()
+			pdf.SetX(20)
+		}
+
+	}
+
+	c.Set("Content-Disposition", "attachment; filename=auction-report.pdf")
+	c.Set("Content-Type", "application/pdf")
+	errWrite := pdf.Write(c.Response().BodyWriter())
+	if errWrite != nil {
+		return errWrite
+	}
+	return nil
 }

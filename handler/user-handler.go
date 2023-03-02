@@ -7,10 +7,13 @@ import (
 	"axion/utils"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/signintech/gopdf"
+	"github.com/xuri/excelize/v2"
 )
 
 // @Summary Get All User
@@ -372,4 +375,193 @@ func UserHandlerDelete(ctx *fiber.Ctx) error {
 	return ctx.JSON(fiber.Map{
 		"message": "user was deleted",
 	})
+}
+
+// @Summary Export Users to Excel
+// @Description Export Users to Excel
+// @Tags User
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 403
+// @Failure 404
+// @Router /users-export-excel [get]
+// @Security ApiKeyAuth
+func UsersExportToExcel(c *fiber.Ctx) error {
+	var users []entity.User
+
+	result := database.DB.Debug().Find(&users)
+	if result.Error != nil {
+		log.Println(result.Error)
+	}
+
+	f := excelize.NewFile()
+
+	index, err := f.NewSheet("Sheet1")
+
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(500).JSON(fiber.Map{
+			"message": "failed to create sheet",
+		})
+	}
+
+	f.SetCellValue("Sheet1", "A1", "No")
+	f.SetCellValue("Sheet1", "B1", "Name")
+	f.SetCellValue("Sheet1", "C1", "Email")
+	f.SetCellValue("Sheet1", "D1", "Phone")
+	f.SetCellValue("Sheet1", "E1", "Address")
+	f.SetCellValue("Sheet1", "F1", "Role")
+
+	style, err := f.NewStyle(&excelize.Style{
+		Font: &excelize.Font{
+			Bold: true,
+		},
+	})
+
+	if err != nil {
+
+		return c.Status(500).JSON(fiber.Map{
+			"message": "failed to create style",
+		})
+	}
+
+	f.SetCellStyle("Sheet1", "A1", "F1", style)
+
+	for i, user := range users {
+		f.SetCellValue("Sheet1", "A"+strconv.Itoa(i+2), i+1)
+		f.SetCellValue("Sheet1", "B"+strconv.Itoa(i+2), user.Name)
+		f.SetCellValue("Sheet1", "C"+strconv.Itoa(i+2), user.Email)
+		f.SetCellValue("Sheet1", "D"+strconv.Itoa(i+2), user.Phone)
+		f.SetCellValue("Sheet1", "E"+strconv.Itoa(i+2), user.Address)
+		f.SetCellValue("Sheet1", "F"+strconv.Itoa(i+2), user.Role)
+	}
+
+	f.SetColWidth("Sheet1", "A", "A", 5)
+	f.SetColWidth("Sheet1", "B", "B", 30)
+	f.SetColWidth("Sheet1", "C", "C", 30)
+	f.SetColWidth("Sheet1", "D", "D", 20)
+	f.SetColWidth("Sheet1", "E", "E", 30)
+	f.SetColWidth("Sheet1", "F", "F", 20)
+
+	f.SetActiveSheet(index)
+
+	c.Set("Content-Disposition", "attachment; filename=users-report.xlsx")
+	c.Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+	errWrite := f.Write(c.Response().BodyWriter())
+	if errWrite != nil {
+		return errWrite
+	}
+	return nil
+}
+
+// @Summary Export Users to PDF
+// @Description Export Users to PDF
+// @Tags User
+// @Accept  json
+// @Produce  json
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 403
+// @Failure 404
+// @Router /users-export-pdf [get]
+// @Security ApiKeyAuth
+func UsersExportToPDF(c *fiber.Ctx) error {
+	var users []entity.User
+
+	result := database.DB.Debug().Find(&users)
+	if result.Error != nil {
+		log.Println(result.Error)
+	}
+
+	f := excelize.NewFile()
+
+	index, err := f.NewSheet("Sheet1")
+
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(500).JSON(fiber.Map{
+			"message": "failed to create sheet",
+		})
+	}
+
+	f.SetCellValue("Sheet1", "A1", "No")
+	f.SetCellValue("Sheet1", "B1", "Name")
+	f.SetCellValue("Sheet1", "C1", "Email")
+
+	style, err := f.NewStyle(&excelize.Style{
+		Font: &excelize.Font{
+			Bold: true,
+		},
+	})
+
+	if err != nil {
+
+		return c.Status(500).JSON(fiber.Map{
+			"message": "failed to create style",
+		})
+	}
+
+	f.SetCellStyle("Sheet1", "A1", "E1", style)
+
+	for i, user := range users {
+		f.SetCellValue("Sheet1", "A"+strconv.Itoa(i+2), user.ID)
+		f.SetCellValue("Sheet1", "B"+strconv.Itoa(i+2), user.Name)
+		f.SetCellValue("Sheet1", "C"+strconv.Itoa(i+2), user.Email)
+	}
+
+	f.SetColWidth("Sheet1", "A", "A", 5)
+	f.SetColWidth("Sheet1", "B", "B", 30)
+	f.SetColWidth("Sheet1", "C", "C", 30)
+
+	f.SetActiveSheet(index)
+
+	pdf := gopdf.GoPdf{}
+	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
+
+	errFont := pdf.AddTTFFont("poppins", "/home/codeyzx/Data/programming/go/axion-be/assets/fonts/Poppins-Medium.ttf")
+	if errFont != nil {
+		log.Println("failed to add font")
+	}
+	errFont = pdf.SetFont("poppins", "", 14)
+	if errFont != nil {
+		log.Println("failed to set font")
+	}
+
+	pdf.AddPage()
+
+	r, err := f.GetRows("Sheet1")
+	for row, rowCells := range r {
+		for _, cell := range rowCells {
+
+			err = pdf.Cell(nil, cell)
+			if err != nil {
+				log.Println(err)
+			}
+
+			pdf.SetX(pdf.GetX() + 100)
+		}
+
+		pdf.Br(30)
+		pdf.SetX(20)
+
+		if row%20 == 19 {
+			pdf.AddPage()
+			pdf.SetX(20)
+		}
+
+	}
+
+	c.Set("Content-Disposition", "attachment; filename=users-report.pdf")
+	c.Set("Content-Type", "application/pdf")
+	errWrite := pdf.Write(c.Response().BodyWriter())
+	if errWrite != nil {
+		return errWrite
+	}
+	return nil
+
 }
