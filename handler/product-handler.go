@@ -66,6 +66,32 @@ func ProductHandlerGetById(ctx *fiber.Ctx) error {
 	})
 }
 
+// @Summary Get Product Users By Id
+// @Description Get Product Users By Id
+// @Tags Product
+// @Accept  json
+// @Produce  json
+// @Param id path string true "User Id"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 404
+// @Router /products-by-users/{id} [get]
+func ProductHandlerGetByUserId(ctx *fiber.Ctx) error {
+	userId := ctx.Params("id")
+
+	var Products []entity.Product
+
+	result := database.DB.Debug().Raw("CALL get_product(?)", userId).Scan(&Products)
+	if result.Error != nil {
+		return ctx.Status(404).JSON(fiber.Map{
+			"message": "Product not found",
+		})
+	}
+
+	return ctx.JSON(Products)
+}
+
 // @Summary Create Product
 // @Description Create Product
 // @Tags Product
@@ -247,11 +273,17 @@ func ProductHandlerDelete(ctx *fiber.Ctx) error {
 			})
 		}
 
-		errDeleteAuction := database.DB.Debug().Model(&Product).Association("Auctions").Delete(&Auction).Error
-		errDeleteProduct := database.DB.Debug().Delete(&Product).Error
-		if errDeleteAuction != nil || errDeleteProduct != nil {
+		updateAuction := database.DB.Model(&Auction).Update("product_id", nil)
+		if updateAuction.Error != nil {
 			return ctx.Status(500).JSON(fiber.Map{
-				"message": "internal server error",
+				"message": "failed to update auction",
+			})
+		}
+
+		deleteProduct := database.DB.Delete(&Product)
+		if deleteProduct.Error != nil {
+			return ctx.Status(500).JSON(fiber.Map{
+				"message": "failed to delete product",
 			})
 		}
 
@@ -295,11 +327,20 @@ func ProductHandlerDelete(ctx *fiber.Ctx) error {
 // @Router /products-export-excel [get]
 // @Security ApiKeyAuth
 func ProductExportToExcel(c *fiber.Ctx) error {
+	temp := c.Locals("userId")
+
 	var Products []entity.Product
 
-	result := database.DB.Debug().Find(&Products)
-	if result.Error != nil {
-		log.Println(result.Error)
+	if temp != 0 {
+		result := database.DB.Debug().Raw("CALL get_product(?)", temp).Scan(&Products)
+		if result.Error != nil {
+			log.Println(result.Error)
+		}
+	} else {
+		result := database.DB.Debug().Find(&Products)
+		if result.Error != nil {
+			log.Println(result.Error)
+		}
 	}
 
 	file := excelize.NewFile()
@@ -383,11 +424,20 @@ func ProductExportToExcel(c *fiber.Ctx) error {
 // @Router /products-export-pdf [get]
 // @Security ApiKeyAuth
 func ProductExportToPDF(c *fiber.Ctx) error {
+	temp := c.Locals("userId")
+
 	var Products []entity.Product
 
-	result := database.DB.Debug().Find(&Products)
-	if result.Error != nil {
-		log.Println(result.Error)
+	if temp != 0 {
+		result := database.DB.Debug().Raw("CALL get_product(?)", temp).Scan(&Products)
+		if result.Error != nil {
+			log.Println(result.Error)
+		}
+	} else {
+		result := database.DB.Debug().Find(&Products)
+		if result.Error != nil {
+			log.Println(result.Error)
+		}
 	}
 
 	file := excelize.NewFile()
@@ -457,7 +507,7 @@ func ProductExportToPDF(c *fiber.Ctx) error {
 
 	pdf.AddPage()
 
-	r, err := file.GetRows(sheet)
+	r, _ := file.GetRows(sheet)
 	for row, rowCells := range r {
 		for _, cell := range rowCells {
 
