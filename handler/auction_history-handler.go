@@ -27,10 +27,6 @@ import (
 // @Security ApiKeyAuth
 func AuctionHistoryHandlerGetAll(ctx *fiber.Ctx) error {
 	var histories []response.AuctionHistory
-
-	// result := database.DB.Debug().Find(&histories)
-	// result := database.DB.Table("auction_histories").Preload("Auction.Product").Preload("Auction.User").Find(&histories)
-	// get auction histories with product name, user name, and auction user name
 	result := database.DB.Table("auction_histories").Select("auction_histories.id, auction_histories.auction_id, auction_histories.user_id, auction_histories.price, auction_histories.created_at, auction_histories.updated_at, auctions.name as auction_name, users.name as user_name").Joins("left join auctions on auctions.id = auction_histories.auction_id").Joins("left join products on products.id = auctions.product_id").Joins("left join users on users.id = auction_histories.user_id").Find(&histories)
 	if result.Error != nil {
 		log.Println(result.Error)
@@ -53,9 +49,8 @@ func AuctionHistoryHandlerGetAll(ctx *fiber.Ctx) error {
 func AuctionHistoryHandlerGetById(ctx *fiber.Ctx) error {
 	ID := ctx.Params("id")
 
-	var auction entity.AuctionHistory
-
-	err := database.DB.Table("auction_histories").Where("auction_histories.id = ?", ID).Preload("Auction.Product").Preload("Auction.User").Preload("User").First(&auction).Error
+	var auction request.AuctionHistory
+	err := database.DB.Table("auction_histories").Where("auction_histories.id = ?", ID).Preload("Auction").Preload("Auction.Product").Preload("Auction.User").Preload("User").First(&auction).Error
 
 	if err != nil {
 		return ctx.Status(404).JSON(fiber.Map{
@@ -135,7 +130,6 @@ func AuctionHistoryHandlerCreate(ctx *fiber.Ctx) error {
 			"error":   err.Error(),
 		})
 	}
-	log.Println("ini auction : ", auction)
 
 	validate := validator.New()
 	errValidate := validate.Struct(auction)
@@ -145,10 +139,6 @@ func AuctionHistoryHandlerCreate(ctx *fiber.Ctx) error {
 			"error":   errValidate.Error(),
 		})
 	}
-
-	log.Println("auction: ", auction)
-	log.Println("auction: ", auction.AuctionID)
-	log.Println("auction: ", auction.UserId)
 
 	newAuctionHistory := entity.AuctionHistory{
 		AuctionID: auction.AuctionID,
@@ -266,11 +256,21 @@ func AuctionHistoryHandlerDelete(ctx *fiber.Ctx) error {
 // @Router /auction-histories-export-excel [get]
 // @Security ApiKeyAuth
 func AuctionHistoryExportToExcel(c *fiber.Ctx) error {
+	temp := c.Locals("userId")
+
 	var histories []response.AuctionHistory
 
-	result := database.DB.Table("auction_histories").Select("auction_histories.id, auction_histories.auction_id, auction_histories.user_id, auction_histories.price, auction_histories.created_at, auction_histories.updated_at, auctions.name as auction_name, users.name as user_name").Joins("left join auctions on auctions.id = auction_histories.auction_id").Joins("left join products on products.id = auctions.product_id").Joins("left join users on users.id = auction_histories.user_id").Find(&histories)
-	if result.Error != nil {
-		log.Println(result.Error)
+	if temp != 0 {
+		result := database.DB.Table("auction_histories").Select("auction_histories.id, auction_histories.auction_id, auction_histories.user_id, auction_histories.price, auction_histories.created_at, auction_histories.updated_at, auctions.name as auction_name, users.name as user_name").Joins("left join auctions on auctions.id = auction_histories.auction_id").Joins("left join products on products.id = auctions.product_id").Joins("left join users on users.id = auction_histories.user_id").Where("auction_histories.user_id = ?", temp).Find(&histories)
+		if result.Error != nil {
+			log.Println(result.Error)
+		}
+	} else {
+
+		result := database.DB.Table("auction_histories").Select("auction_histories.id, auction_histories.auction_id, auction_histories.user_id, auction_histories.price, auction_histories.created_at, auction_histories.updated_at, auctions.name as auction_name, users.name as user_name").Joins("left join auctions on auctions.id = auction_histories.auction_id").Joins("left join products on products.id = auctions.product_id").Joins("left join users on users.id = auction_histories.user_id").Find(&histories)
+		if result.Error != nil {
+			log.Println(result.Error)
+		}
 	}
 
 	file := excelize.NewFile()
@@ -346,14 +346,23 @@ func AuctionHistoryExportToExcel(c *fiber.Ctx) error {
 // @Router /auction-histories-export-pdf [get]
 // @Security ApiKeyAuth
 func AuctionHistoryExportToPDF(c *fiber.Ctx) error {
+	temp := c.Locals("userId")
+
 	var histories []response.AuctionHistory
 
-	result := database.DB.Table("auction_histories").Select("auction_histories.id, auction_histories.auction_id, auction_histories.user_id, auction_histories.price, auction_histories.created_at, auction_histories.updated_at, auctions.name as auction_name, users.name as user_name").Joins("left join auctions on auctions.id = auction_histories.auction_id").Joins("left join products on products.id = auctions.product_id").Joins("left join users on users.id = auction_histories.user_id").Find(&histories)
-	if result.Error != nil {
-		log.Println(result.Error)
+	if temp != 0 {
+		result := database.DB.Table("auction_histories").Select("auction_histories.id, auction_histories.auction_id, auction_histories.user_id, auction_histories.price, auction_histories.created_at, auction_histories.updated_at, auctions.name as auction_name, users.name as user_name").Joins("left join auctions on auctions.id = auction_histories.auction_id").Joins("left join products on products.id = auctions.product_id").Joins("left join users on users.id = auction_histories.user_id").Where("auction_histories.user_id = ?", temp).Find(&histories)
+		if result.Error != nil {
+			log.Println(result.Error)
+		}
+	} else {
+
+		result := database.DB.Table("auction_histories").Select("auction_histories.id, auction_histories.auction_id, auction_histories.user_id, auction_histories.price, auction_histories.created_at, auction_histories.updated_at, auctions.name as auction_name, users.name as user_name").Joins("left join auctions on auctions.id = auction_histories.auction_id").Joins("left join products on products.id = auctions.product_id").Joins("left join users on users.id = auction_histories.user_id").Find(&histories)
+		if result.Error != nil {
+			log.Println(result.Error)
+		}
 	}
 
-	// create list of histories.AuctionName
 	var auctionNames []string
 	for _, history := range histories {
 		if history.AuctionName == "" {
@@ -417,9 +426,10 @@ func AuctionHistoryExportToPDF(c *fiber.Ctx) error {
 
 	pdf.AddPage()
 
-	r, err := file.GetRows(sheet)
-	// add margin left
+	r, _ := file.GetRows(sheet)
+
 	pdf.SetX(20)
+	
 	for row, rowCells := range r {
 		for _, cell := range rowCells {
 			err = pdf.Cell(nil, cell)
