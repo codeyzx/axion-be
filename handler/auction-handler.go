@@ -29,7 +29,7 @@ import (
 func AuctionHandlerGetAll(ctx *fiber.Ctx) error {
 	var auctions []response.Auction
 
-	result := database.DB.Preload("Product").Preload("User").Find(&auctions)
+	result := database.DB.Preload("Product").Preload("User").Preload("Bidder").Find(&auctions)
 	if result.Error != nil {
 		log.Println(result.Error)
 	}
@@ -53,7 +53,7 @@ func AuctionHandlerGetById(ctx *fiber.Ctx) error {
 
 	var auction response.Auction
 
-	err := database.DB.Where("auctions.id = ?", ID).Preload("Product").Preload("User").Preload("AuctionHistory").First(&auction).Error
+	err := database.DB.Where("auctions.id = ?", ID).Preload("Product").Preload("User").Preload("Bidder").Preload("AuctionHistory").First(&auction).Error
 
 	if err != nil {
 		return ctx.Status(404).JSON(fiber.Map{
@@ -79,7 +79,6 @@ func AuctionHandlerGetById(ctx *fiber.Ctx) error {
 // @Router /auctions [post]
 // @Security ApiKeyAuth
 func AuctionHandlerCreate(ctx *fiber.Ctx) error {
-
 	productId := uuid.New()
 	auction := new(request.AuctionCreateRequest)
 	if err := ctx.BodyParser(auction); err != nil {
@@ -108,6 +107,20 @@ func AuctionHandlerCreate(ctx *fiber.Ctx) error {
 		pathFileString = fmt.Sprintf("%v", pathFile)
 	}
 
+	var bidId *uint
+	if auction.BidderId == 0 {
+		bidId = nil
+	} else {
+		bidId = &auction.BidderId
+	}
+
+	var userId *uint
+	if auction.UserId == 0 {
+		userId = nil
+	} else {
+		userId = &auction.UserId
+	}
+
 	newProduct := entity.Product{
 		ID:          productId,
 		Name:        auction.ProductName,
@@ -118,9 +131,10 @@ func AuctionHandlerCreate(ctx *fiber.Ctx) error {
 
 	newAuction := entity.Auction{
 		Name:         auction.Name,
-		ProductID:    productId,
+		ProductID:    &productId,
 		LastPrice:    auction.Price,
-		UserId:       auction.UserId,
+		UserId:       userId,
+		BidderId:     bidId,
 		Status:       entity.Open,
 		BiddersCount: auction.BiddersCount,
 		EndAt:        auction.EndAt,
@@ -191,14 +205,14 @@ func AuctionHandlerUpdate(ctx *fiber.Ctx) error {
 		auction.LastPrice = auctionRequest.LastPrice
 	}
 
-	if auctionRequest.UserId != 0 {
-		auction.UserId = auctionRequest.UserId
-	}
-
 	if auctionRequest.EndAt != "" {
 		auction.EndAt = auctionRequest.EndAt
 	}
 
+	if auctionRequest.BiddersCount != 0 {
+		auction.BiddersCount = auctionRequest.BiddersCount
+	}
+	
 	errUpdate := database.DB.Save(&auction).Error
 	if errUpdate != nil {
 		return ctx.Status(500).JSON(fiber.Map{
@@ -261,11 +275,20 @@ func AuctionHandlerDelete(ctx *fiber.Ctx) error {
 // @Router /auctions-export-excel [get]
 // @Security ApiKeyAuth
 func AuctionExportToExcel(c *fiber.Ctx) error {
+	temp := c.Locals("userId")
+
 	var auctions []response.Auction
 
-	result := database.DB.Preload("Product").Preload("User").Find(&auctions)
-	if result.Error != nil {
-		log.Println(result.Error)
+	if temp != 0 {
+		result := database.DB.Preload("Product").Preload("User").Preload("Bidder").Where("user_id = ?", temp).Find(&auctions)
+		if result.Error != nil {
+			log.Println(result.Error)
+		}
+	} else {
+		result := database.DB.Preload("Product").Preload("User").Preload("Bidder").Find(&auctions)
+		if result.Error != nil {
+			log.Println(result.Error)
+		}
 	}
 
 	file := excelize.NewFile()
@@ -282,11 +305,12 @@ func AuctionExportToExcel(c *fiber.Ctx) error {
 	file.SetCellValue(sheet, "B1", "Name")
 	file.SetCellValue(sheet, "C1", "Last Price")
 	file.SetCellValue(sheet, "D1", "Status")
-	file.SetCellValue(sheet, "E1", "Bidders")
-	file.SetCellValue(sheet, "F1", "User")
-	file.SetCellValue(sheet, "G1", "Product")
-	file.SetCellValue(sheet, "H1", "Image")
-	file.SetCellValue(sheet, "I1", "End At")
+	file.SetCellValue(sheet, "E1", "BidCount")
+	file.SetCellValue(sheet, "F1", "Bidder")
+	file.SetCellValue(sheet, "G1", "User")
+	file.SetCellValue(sheet, "H1", "Product")
+	file.SetCellValue(sheet, "I1", "Image")
+	file.SetCellValue(sheet, "J1", "End At")
 
 	style, err := file.NewStyle(&excelize.Style{
 		Font: &excelize.Font{
@@ -300,7 +324,7 @@ func AuctionExportToExcel(c *fiber.Ctx) error {
 		})
 	}
 
-	file.SetCellStyle(sheet, "A1", "I1", style)
+	file.SetCellStyle(sheet, "A1", "J1", style)
 
 	for i, auction := range auctions {
 		i = i + 2
@@ -309,9 +333,10 @@ func AuctionExportToExcel(c *fiber.Ctx) error {
 		file.SetCellValue(sheet, "C"+strconv.Itoa(i), auction.LastPrice)
 		file.SetCellValue(sheet, "D"+strconv.Itoa(i), auction.Status)
 		file.SetCellValue(sheet, "E"+strconv.Itoa(i), auction.BiddersCount)
-		file.SetCellValue(sheet, "F"+strconv.Itoa(i), auction.User.Name)
-		file.SetCellValue(sheet, "G"+strconv.Itoa(i), auction.Product.Name)
-		file.SetCellValue(sheet, "I"+strconv.Itoa(i), auction.EndAt)
+		file.SetCellValue(sheet, "F"+strconv.Itoa(i), auction.Bidder.Name)
+		file.SetCellValue(sheet, "G"+strconv.Itoa(i), auction.User.Name)
+		file.SetCellValue(sheet, "H"+strconv.Itoa(i), auction.Product.Name)
+		file.SetCellValue(sheet, "J"+strconv.Itoa(i), auction.EndAt)
 
 		graphicOptions := excelize.GraphicOptions{
 			AutoFit: true,
@@ -320,7 +345,7 @@ func AuctionExportToExcel(c *fiber.Ctx) error {
 		log.Println(auction.Product)
 		if auction.Product.Image != "" {
 			var imagePath = strings.Replace(auction.Product.Image, "./public/covers/", "", -1)
-			errImage := file.AddPicture(sheet, "H"+strconv.Itoa(i), "/home/codeyzx/Data/programming/go/axion-be/public/covers/"+imagePath, &graphicOptions)
+			errImage := file.AddPicture(sheet, "I"+strconv.Itoa(i), "/home/codeyzx/Data/programming/go/axion-be/public/covers/"+imagePath, &graphicOptions)
 
 			if errImage != nil {
 				fmt.Println("err:::", errImage)
@@ -337,6 +362,7 @@ func AuctionExportToExcel(c *fiber.Ctx) error {
 	file.SetColWidth(sheet, "G", "G", 20)
 	file.SetColWidth(sheet, "H", "H", 20)
 	file.SetColWidth(sheet, "I", "I", 20)
+	file.SetColWidth(sheet, "J", "J", 20)
 
 	file.SetActiveSheet(index)
 
@@ -363,11 +389,20 @@ func AuctionExportToExcel(c *fiber.Ctx) error {
 // @Router /auctions-export-pdf [get]
 // @Security ApiKeyAuth
 func AuctionExportToPDF(c *fiber.Ctx) error {
+	temp := c.Locals("userId")
+
 	var auctions []response.Auction
 
-	result := database.DB.Preload("Product").Preload("User").Find(&auctions)
-	if result.Error != nil {
-		log.Println(result.Error)
+	if temp != 0 {
+		result := database.DB.Preload("Product").Preload("User").Where("user_id = ?", temp).Find(&auctions)
+		if result.Error != nil {
+			log.Println(result.Error)
+		}
+	} else {
+		result := database.DB.Preload("Product").Preload("User").Find(&auctions)
+		if result.Error != nil {
+			log.Println(result.Error)
+		}
 	}
 
 	var auctionNames []string
@@ -437,7 +472,7 @@ func AuctionExportToPDF(c *fiber.Ctx) error {
 
 	pdf.AddPage()
 
-	r, err := file.GetRows(sheet)
+	r, _ := file.GetRows(sheet)
 	for row, rowCells := range r {
 		for _, cell := range rowCells {
 
