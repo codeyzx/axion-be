@@ -1049,6 +1049,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/products-by-users/{id}": {
+            "get": {
+                "description": "Get Product Users By Id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Product"
+                ],
+                "summary": "Get Product Users By Id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User Id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
         "/products-export-excel": {
             "get": {
                 "security": [
@@ -1688,6 +1726,9 @@ const docTemplate = `{
                 "userId"
             ],
             "properties": {
+                "bidderId": {
+                    "type": "integer"
+                },
                 "biddersCount": {
                     "type": "integer"
                 },
@@ -1745,6 +1786,9 @@ const docTemplate = `{
         "request.AuctionUpdateRequest": {
             "type": "object",
             "properties": {
+                "biddersCount": {
+                    "type": "integer"
+                },
                 "endAt": {
                     "type": "string"
                 },
@@ -1756,9 +1800,6 @@ const docTemplate = `{
                 },
                 "status": {
                     "$ref": "#/definitions/entity.Status"
-                },
-                "userId": {
-                    "type": "integer"
                 }
             }
         },
