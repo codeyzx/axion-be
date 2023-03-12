@@ -338,7 +338,7 @@ func HistoryExportToPDF(c *fiber.Ctx) error {
 
 	pdf.AddPage()
 
-	r, err := file.GetRows(sheet)
+	r, _ := file.GetRows(sheet)
 	for row, rowCells := range r {
 		for _, cell := range rowCells {
 
