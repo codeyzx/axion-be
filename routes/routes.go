@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/swagger"
 )
 
+// TODO:: Benerin middleware.ByID
 func RouteInit(r *fiber.App) {
 	r.Get("/", func(c *fiber.Ctx) error {
 		return c.Redirect("/docs")
