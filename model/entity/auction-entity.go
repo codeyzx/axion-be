@@ -20,11 +20,13 @@ type Auction struct {
 	LastPrice      int              `json:"last_price"`
 	Status         Status           `json:"status"`
 	BiddersCount   int              `json:"bidders_count"`
-	ProductID      uuid.UUID        `json:"product_id" gorm:"unique"`
+	ProductID      *uuid.UUID       `json:"product_id" gorm:"unique"`
 	Product        Product          `json:"-"`
 	AuctionHistory []AuctionHistory `json:"auction_history"`
-	UserId         uint             `json:"user_id"`
+	UserId         *uint            `json:"user_id"`
 	User           User             `json:"-"`
+	BidderId       *uint            `json:"bidder_id"`
+	Bidder         User             `json:"-"`
 	EndAt          string           `json:"end_at"`
 	CreatedAt      time.Time        `json:"created_at"`
 	UpdatedAt      time.Time        `json:"updated_at"`
