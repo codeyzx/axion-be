@@ -19,6 +19,8 @@ type Auction struct {
 	AuctionHistory []AuctionHistory `json:"auction_history"`
 	UserId         uint             `json:"-"`
 	User           User             `json:"user"`
+	BidderId       uint             `json:"-"`
+	Bidder         User             `json:"bidder"`
 	EndAt          string           `json:"end_at"`
 	CreatedAt      time.Time        `json:"created_at"`
 	UpdatedAt      time.Time        `json:"updated_at"`
