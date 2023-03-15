@@ -53,7 +53,7 @@ func AuctionHandlerGetById(ctx *fiber.Ctx) error {
 
 	var auction response.Auction
 
-	err := database.DB.Where("auctions.id = ?", ID).Preload("Product").Preload("User").Preload("Bidder").Preload("AuctionHistory").First(&auction).Error
+	err := database.DB.Where("auctions.id = ?", ID).Preload("Product").Preload("User").Preload("Bidder").Preload("AuctionHistory").Preload("AuctionHistory.Auction").Preload("AuctionHistory.User").First(&auction).Error
 
 	if err != nil {
 		return ctx.Status(404).JSON(fiber.Map{
@@ -212,7 +212,7 @@ func AuctionHandlerUpdate(ctx *fiber.Ctx) error {
 	if auctionRequest.BiddersCount != 0 {
 		auction.BiddersCount = auctionRequest.BiddersCount
 	}
-	
+
 	errUpdate := database.DB.Save(&auction).Error
 	if errUpdate != nil {
 		return ctx.Status(500).JSON(fiber.Map{
