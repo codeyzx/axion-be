@@ -1,0 +1,44 @@
+shape: sequence_diagram
+user: { shape: person }
+operator: { shape: person }
+admin: { shape: person }
+auction: { shape: cloud }
+
+user.t -> auction.t: Create auction
+auction.t -> user.t: Auction created
+
+user.t -> auction.t: Create product
+auction.t -> user.t: Product created
+
+user.t -> auction.t: View profile
+auction.t -> user.t: Profile details
+
+user.t -> auction.t: View bidding history
+auction.t -> user.t: Bidding history details
+
+operator.t -> auction.t: View all users
+auction.t -> operator.t: User list
+
+operator.t -> auction.t: View all auctions
+auction.t -> operator.t: Auction list
+
+operator.t -> auction.t: View all products
+auction.t -> operator.t: Product list
+
+operator.t -> auction.t: View all bidding histories
+auction.t -> operator.t: Bidding history list
+
+operator.t -> auction.t: Export data to Excel
+auction.t -> operator.t: Excel file generated
+
+operator.t -> auction.t: Export data to PDF
+auction.t -> operator.t: PDF file generated
+
+admin.t -> auction.t: Update user roles
+auction.t -> admin.t: User roles updated
+
+admin.t -> auction.t: Delete user
+auction.t -> admin.t: User deleted
+
+admin.t -> auction.t: View auction history
+auction.t -> admin.t: auction history details
