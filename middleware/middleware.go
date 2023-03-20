@@ -17,7 +17,7 @@ func Admin(ctx *fiber.Ctx) error {
 
 	claims, err := utils.DecodeToken(token)
 	if err != nil {
-		log.Println("err :: ", err)
+		log.Println(err)
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "unauthenticated",
 		})
@@ -43,7 +43,7 @@ func Operator(ctx *fiber.Ctx) error {
 
 	claims, err := utils.DecodeToken(token)
 	if err != nil {
-		log.Println("err :: ", err)
+		log.Println(err)
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "unauthenticated",
 		})
@@ -69,7 +69,7 @@ func Users(ctx *fiber.Ctx) error {
 
 	claims, err := utils.DecodeToken(token)
 	if err != nil {
-		log.Println("err :: ", err)
+		log.Println(err)
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "unauthenticated",
 		})
@@ -95,9 +95,8 @@ func ByID(ctx *fiber.Ctx) error {
 	}
 
 	claims, err := utils.DecodeToken(token)
-	log.Println(claims)
 	if err != nil {
-		log.Println("err :: ", err)
+		log.Println(err)
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "unauthenticated",
 		})
@@ -119,7 +118,6 @@ func ByID(ctx *fiber.Ctx) error {
 	} else {
 		userId = 0
 	}
-	log.Println("userId :: ", userId)
 	if userId != 0 {
 
 		ctx.Locals("userId", userId)
@@ -139,9 +137,8 @@ func Auth(ctx *fiber.Ctx) error {
 	}
 
 	claims, err := utils.DecodeToken(token)
-	log.Println(claims)
 	if err != nil {
-		log.Println("err :: ", err)
+		log.Println(err)
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "unauthenticated",
 		})
@@ -162,7 +159,6 @@ func Auth(ctx *fiber.Ctx) error {
 		userId = 0
 	}
 
-	log.Println("userId :: ", userId)
 	ctx.Locals("userId", userId)
 
 	return ctx.Next()

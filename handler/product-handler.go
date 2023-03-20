@@ -201,13 +201,8 @@ func ProductHandlerUpdate(ctx *fiber.Ctx) error {
 	Product.Description = ProductRequest.Description
 	Product.Name = ProductRequest.Name
 
-	log.Println("userId", userId)
 	if userId != 0 {
-		log.Println("MASUK UPDATE")
 		result := database.DB.Debug().Exec("CALL update_product(?, ?, ?, ?, ?, ?)", Product.ID, userId, Product.Name, Product.Description, Product.Price, Product.Image)
-
-		log.Println(result)
-		log.Println(result.RowsAffected)
 
 		if result.Error != nil {
 			return ctx.Status(500).JSON(fiber.Map{
@@ -262,7 +257,6 @@ func ProductHandlerDelete(ctx *fiber.Ctx) error {
 		})
 	}
 
-	log.Println("userId", userId)
 	if userId != 0 {
 		var Auction entity.Auction
 		errAuction := database.DB.Debug().First(&Auction, "product_id=? AND user_id=?", ID, userId).Error
@@ -388,7 +382,7 @@ func ProductExportToExcel(c *fiber.Ctx) error {
 			errImage := file.AddPicture(sheet, "E"+strconv.Itoa(i), "/home/codeyzx/Data/programming/go/axion-be/public/covers/"+imagePath, &graphicOptions)
 
 			if errImage != nil {
-				fmt.Println("err:::", errImage)
+				fmt.Println(errImage)
 			}
 		}
 	}
@@ -482,7 +476,7 @@ func ProductExportToPDF(c *fiber.Ctx) error {
 			errImage := file.AddPicture(sheet, "C"+strconv.Itoa(i), "/home/codeyzx/Data/programming/go/axion-be/public/covers/"+imagePath, &graphicOptions)
 
 			if errImage != nil {
-				fmt.Println("err:::", errImage)
+				fmt.Println(errImage)
 			}
 		}
 	}
@@ -515,7 +509,7 @@ func ProductExportToPDF(c *fiber.Ctx) error {
 
 				errImage := pdf.Image(cell, pdf.GetX(), pdf.GetY(), &gopdf.Rect{W: 50, H: 50})
 				if errImage != nil {
-					log.Println("errImage::", errImage)
+					log.Println(errImage)
 				}
 				pdf.SetX(pdf.GetX() + 50)
 				pdf.SetY(pdf.GetY() + 10)

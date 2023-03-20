@@ -28,7 +28,6 @@ func LoginHandler(ctx *fiber.Ctx) error {
 	if err := ctx.BodyParser(loginRequest); err != nil {
 		return err
 	}
-	log.Println(loginRequest)
 
 	validate := validator.New()
 	errValidate := validate.Struct(loginRequest)
@@ -104,7 +103,7 @@ func CheckJWT(ctx *fiber.Ctx) error {
 
 	_, err := utils.DecodeToken(token)
 	if err != nil {
-		log.Println("err :: ", err)
+		log.Println(err)
 		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 			"message": "unauthorized",
 		})

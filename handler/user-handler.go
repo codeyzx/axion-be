@@ -177,7 +177,6 @@ func UserHandlerUpdate(ctx *fiber.Ctx) error {
 
 	userId := ctx.Params("id")
 
-	log.Println(userId + " " + authId)
 	if temp != 0 {
 		if userId != authId {
 			return ctx.Status(403).JSON(fiber.Map{
@@ -248,7 +247,6 @@ func UserHandlerUpdateEmail(ctx *fiber.Ctx) error {
 
 	userId := ctx.Params("id")
 
-	log.Println(userId + " " + authId)
 	if temp != 0 {
 		if userId != authId {
 			return ctx.Status(403).JSON(fiber.Map{
@@ -322,7 +320,6 @@ func UserHandlerUpdateRole(ctx *fiber.Ctx) error {
 	user.Role = userRequest.Role
 
 	if user.Role == "" && user.Role != entity.Admin && user.Role != entity.Operator && user.Role != entity.Users {
-		log.Println("masuk")
 		return ctx.Status(400).JSON(fiber.Map{
 			"message": "Role must be Admin, Operator or Users",
 		})

@@ -86,7 +86,6 @@ func AuctionHistoryHandlerGetByUser(ctx *fiber.Ctx) error {
 
 	var auction []entity.AuctionHistory
 
-	log.Println(ID + " " + authId)
 	if temp != 0 {
 		if ID != authId {
 			return ctx.Status(403).JSON(fiber.Map{
@@ -429,7 +428,7 @@ func AuctionHistoryExportToPDF(c *fiber.Ctx) error {
 	r, _ := file.GetRows(sheet)
 
 	pdf.SetX(20)
-	
+
 	for row, rowCells := range r {
 		for _, cell := range rowCells {
 			err = pdf.Cell(nil, cell)

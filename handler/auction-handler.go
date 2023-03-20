@@ -88,7 +88,6 @@ func AuctionHandlerCreate(ctx *fiber.Ctx) error {
 		})
 	}
 
-	log.Println("auction : ", auction)
 	validate := validator.New()
 	errValidate := validate.Struct(auction)
 	if errValidate != nil {
@@ -342,13 +341,12 @@ func AuctionExportToExcel(c *fiber.Ctx) error {
 			AutoFit: true,
 		}
 
-		log.Println(auction.Product)
 		if auction.Product.Image != "" {
 			var imagePath = strings.Replace(auction.Product.Image, "./public/covers/", "", -1)
 			errImage := file.AddPicture(sheet, "I"+strconv.Itoa(i), "/home/codeyzx/Data/programming/go/axion-be/public/covers/"+imagePath, &graphicOptions)
 
 			if errImage != nil {
-				fmt.Println("err:::", errImage)
+				fmt.Println(errImage)
 			}
 		}
 	}
