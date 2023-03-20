@@ -20,6 +20,7 @@ Axion is a simple auction application built with Go and React. It is a simple ap
 | _GET_    | `/docs/*`                         | _Serves the API documentation page_               | _All users_      |
 | _GET_    | `/public/*`                       | _Serves static files (images, CSS, etc.)_         | _All users_      |
 | _POST_   | `/login`                          | _Logs in a user_                                  | _All users_      |
+| _GET_    | `/check-jwt`                      | _Validate Expiration JWT_                         | _All users_      |
 | _POST_   | `/register`                       | _Registers a new user_                            | _All users_      |
 | _GET_    | `/users`                          | _Gets a list of all users_                        | _Admin_          |
 | _GET_    | `/users/:id`                      | _Gets information on a single user_               | _All users_      |
@@ -31,6 +32,7 @@ Axion is a simple auction application built with Go and React. It is a simple ap
 | _GET_    | `/users-export-pdf`               | _Get file pdf of users data_                      | _Admin_          |
 | _GET_    | `/products`                       | _Gets a list of all products_                     | _All users_      |
 | _GET_    | `/products/:id`                   | _Gets information on a single product_            | _All users_      |
+| _GET_    | `/products-by-users/:id`          | _Gets a list of all products on a single user_    | _All users_      |
 | _POST_   | `/products`                       | _Creates a new product_                           | _Operator_       |
 | _PUT_    | `/products`                       | _Update a product_                                | _Owner/Operator_ |
 | _DELETE_ | `/products/:id`                   | _Delete a product_                                | _Owner/Operator_ |
