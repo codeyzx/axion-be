@@ -39,8 +39,7 @@ func main() {
 	}))
 
 	route.RouteInit(app)
-	port := "8080"
-	errListen := app.Listen("0.0.0.0:" + port)
+	errListen := app.Listen(":" + os.Getenv("PORT"))
 
 	if errListen != nil {
 		log.Println("Fail to listen go fiber server")
