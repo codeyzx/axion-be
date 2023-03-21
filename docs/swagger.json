@@ -14,7 +14,7 @@
         },
         "version": "1.0"
     },
-    "host": "axion-be.codeyzx.repl.co",
+    "host": "axion-be-production.up.railway.app",
     "paths": {
         "/auction-histories": {
             "get": {

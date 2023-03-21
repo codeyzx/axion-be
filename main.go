@@ -21,7 +21,7 @@ import (
 // @contact.email yahyatruth@gmail.com
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-// @host axion-be.codeyzx.repl.co
+// @host axion-be-production.up.railway.app
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization

@@ -144,7 +144,7 @@ definitions:
       phone:
         type: string
     type: object
-host: axion-be.codeyzx.repl.co
+host: axion-be-production.up.railway.app
 info:
   contact:
     email: yahyatruth@gmail.com
