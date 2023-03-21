@@ -3,7 +3,7 @@ package database
 import (
 	"fmt"
 
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
@@ -12,8 +12,8 @@ var DB *gorm.DB
 func DatabaseInit() {
 	var err error
 
-	dsn := "root:@tcp(127.0.0.1:3306)/axion?charset=utf8mb4&parseTime=True&loc=Local"
-	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	dsn := "postgres://xntvhptn:vaA_cLu0kIN-75ysGKCkiT4241DhpdkD@trumpet.db.elephantsql.com/xntvhptn"
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("Cannot connect to database")
 	}

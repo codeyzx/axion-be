@@ -144,7 +144,7 @@ definitions:
       phone:
         type: string
     type: object
-host: 127.0.0.1:8080
+host: axion-be.codeyzx.repl.co
 info:
   contact:
     email: yahyatruth@gmail.com
