@@ -24,7 +24,7 @@ func HandleSingleFile(ctx *fiber.Ctx) error {
 	var pathFile *string
 
 	if file != nil {
-		errCheckContentType := checkContentType(file, "image/jpg", "image/png", "image/gif")
+		errCheckContentType := checkContentType(file, "image/jpg", "image/jpeg", "image/webp", "image/jfif", "image/png", "image/gif")
 		if errCheckContentType != nil {
 			return ctx.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
 				"message": errCheckContentType.Error(),
@@ -78,6 +78,7 @@ func checkContentType(file *multipart.FileHeader, contentTypes ...string) error 
 	if len(contentTypes) > 0 {
 		for _, contentType := range contentTypes {
 			contentTypeFile := file.Header.Get("Content-Type")
+			log.Println("contentTypeFile = ", contentTypeFile)
 			if contentTypeFile == contentType {
 				return nil
 			}
