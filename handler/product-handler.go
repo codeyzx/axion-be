@@ -490,7 +490,7 @@ func ProductExportToPDF(c *fiber.Ctx) error {
 	pdf := gopdf.GoPdf{}
 	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
 
-	errFont := pdf.AddTTFFont("poppins", "/home/codeyzx/Data/programming/go/axion-be/assets/fonts/Poppins-Medium.ttf")
+	errFont := pdf.AddTTFFont("poppins", "assets/fonts/Poppins-Medium.ttf")
 	if errFont != nil {
 		log.Println("failed to add font")
 	}
